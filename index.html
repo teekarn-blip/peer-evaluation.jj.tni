@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฟอร์มประเมินเพื่อนร่วมกลุ่ม</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; padding: 20px; }
+        .container { max-width: 800px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .peer-row { background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="text-center mb-4">ฟอร์มประเมินสมาชิกในกลุ่ม</h2>
+    
+    <form id="evaluationForm">
+        <!-- ข้อมูลผู้ประเมิน -->
+        <h4 class="mb-3 text-primary">ข้อมูลส่วนตัว (ผู้ประเมิน)</h4>
+        <div class="row mb-3">
+            <div class="col-md-3 mb-2">
+                <label>รหัสนักศึกษา</label>
+                <input type="text" name="student_id" class="form-control" required>
+            </div>
+            <!-- เพิ่มช่องเลือกชั้นปี -->
+            <div class="col-md-2 mb-2">
+                <label>ชั้นปี</label>
+                <select name="year" class="form-select" required>
+                    <option value="">เลือก</option>
+                    <option value="1">ปี 1</option>
+                    <option value="2">ปี 2</option>
+                    <option value="3">ปี 3</option>
+                    <option value="4">ปี 4</option>
+                    <option value="อื่นๆ">อื่นๆ</option>
+                </select>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label>ชื่อ-นามสกุล</label>
+                <input type="text" name="evaluator_name" id="evaluatorName" class="form-control" required>
+            </div>
+            <div class="col-md-3 mb-2">
+                <label>ชื่อกลุ่ม</label>
+                <input type="text" name="group_name" class="form-control" required>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- ประเมินตนเอง -->
+        <h4 class="mb-3 text-success">1. ประเมินตนเอง</h4>
+        <div class="peer-row row align-items-center">
+            <div class="col-md-8">
+                <label>ให้คะแนนตนเอง (0-10)</label>
+                <p class="text-muted small mb-0">ระบบจะดึงชื่อของคุณมาเป็นผู้รับการประเมินคนที่ 1 อัตโนมัติ</p>
+            </div>
+            <div class="col-md-4">
+                <input type="number" name="self_score" class="form-control" min="0" max="10" placeholder="คะแนน 0-10" required>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- ประเมินเพื่อนคนที่ 2-10 -->
+        <h4 class="mb-3 text-info">ประเมินเพื่อนในกลุ่ม</h4>
+        <p class="text-danger small">* หากกลุ่มมีไม่ถึง 10 คน ให้เว้นช่องที่เหลือไว้ว่างๆ</p>
+        
+        <div id="peerList">
+            <!-- JavaScript จะสร้างช่องประเมินเพื่อนคนที่ 2 ถึง 10 ให้ตรงนี้ -->
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-lg w-100" id="submitBtn">ส่งผลการประเมิน</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // สร้างช่องกรอกเพื่อนคนที่ 2 ถึง 10 อัตโนมัติ
+    const peerList = document.getElementById('peerList');
+    for (let i = 2; i <= 10; i++) {
+        peerList.innerHTML += `
+        <div class="peer-row row mb-2">
+            <div class="col-md-8">
+                <label>${i}. ชื่อ-สกุล เพื่อนคนที่ ${i}</label>
+                <input type="text" name="peer${i}_name" class="form-control" placeholder="ชื่อ-นามสกุล">
+            </div>
+            <div class="col-md-4">
+                <label>คะแนน (0-10)</label>
+                <input type="number" name="peer${i}_score" class="form-control" min="0" max="10" placeholder="0-10">
+            </div>
+        </div>`;
+    }
+
+    // จัดการเมื่อกดปุ่ม Submit
+    document.getElementById('evaluationForm').addEventListener('submit', function(e) {
+        e.preventDefault(); 
+        
+        const btn = document.getElementById('submitBtn');
+        btn.innerHTML = 'กำลังส่งข้อมูล...';
+        btn.disabled = true;
+
+        // *** อย่าลืมนำ URL จาก Google Apps Script (อันใหม่หรืออันเดิมที่อัปเดตแล้ว) มาใส่ตรงนี้ ***
+        const scriptURL = '[https://script.google.com/macros/s/AKfycbw8fnun5-K3BdXFQRQ_bX1HOwzEjJ6SXgG3nMydIubABO2TLPlVa1OqKqUt1CFyDCoC/exec](https://script.google.com/macros/s/AKfycbw8fnun5-K3BdXFQRQ_bX1HOwzEjJ6SXgG3nMydIubABO2TLPlVa1OqKqUt1CFyDCoC/exec)';
+
+        const formData = new FormData(this);
+
+        fetch(scriptURL, { method: 'POST', body: formData })
+            .then(response => {
+                alert('ส่งข้อมูลการประเมินเรียบร้อยแล้ว!');
+                this.reset();
+                btn.innerHTML = 'ส่งผลการประเมิน';
+                btn.disabled = false;
+            })
+            .catch(error => {
+                alert('เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
+                btn.innerHTML = 'ส่งผลการประเมิน';
+                btn.disabled = false;
+            });
+    });
+</script>
+
+</body>
+</html>
