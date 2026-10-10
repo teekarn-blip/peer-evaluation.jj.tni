@@ -101,12 +101,11 @@
         btn.innerHTML = 'กำลังส่งข้อมูล...';
         btn.disabled = true;
 
-        // *** อย่าลืมนำ URL จาก Google Apps Script (อันใหม่หรืออันเดิมที่อัปเดตแล้ว) มาใส่ตรงนี้ ***
-        const scriptURL = '[https://script.google.com/macros/s/AKfycbw8fnun5-K3BdXFQRQ_bX1HOwzEjJ6SXgG3nMydIubABO2TLPlVa1OqKqUt1CFyDCoC/exec](https://script.google.com/macros/s/AKfycbw8fnun5-K3BdXFQRQ_bX1HOwzEjJ6SXgG3nMydIubABO2TLPlVa1OqKqUt1CFyDCoC/exec)';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbw8fnun5-K3BdXFQRQ_bX1HOwzEjJ6SXgG3nMydIubABO2TLPlVa1OqKqUt1CFyDCoC/exec';
 
         const formData = new FormData(this);
 
-        fetch(scriptURL, { method: 'POST', body: formData })
+        fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors' })
             .then(response => {
                 alert('ส่งข้อมูลการประเมินเรียบร้อยแล้ว!');
                 this.reset();
